@@ -4,8 +4,9 @@ FROM $BUILD_FROM
 # Install dependencies
 RUN apk add --no-cache ca-certificates curl libcap bash jq iptables unzip
 
-# Copy startup script
+# Copy startup script and default config
 COPY run.sh /
+COPY mihomo/config.yaml /defaults/config.yaml
 RUN chmod a+x /run.sh
 
 # Download Mihomo (Clash Meta)

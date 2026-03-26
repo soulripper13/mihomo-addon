@@ -32,11 +32,11 @@ if [ ! -d "${CONFIG_DIR}" ]; then
     mkdir -p "${CONFIG_DIR}"
 fi
 
-# Check if config file exists
+# Check if config file exists; if not, create it from the default template
 if [ ! -f "${CONFIG_PATH}" ]; then
-    bashio::log.error "Configuration file not found at ${CONFIG_PATH}"
-    bashio::log.error "Please create a valid Mihomo config at that location."
-    exit 1
+    bashio::log.warning "No config found at ${CONFIG_PATH}. Creating a default config."
+    bashio::log.warning "Edit /config/mihomo/config.yaml and restart the add-on to apply your settings."
+    cp /defaults/config.yaml "${CONFIG_PATH}"
 fi
 
 # Set capabilities (redundant but safe)
