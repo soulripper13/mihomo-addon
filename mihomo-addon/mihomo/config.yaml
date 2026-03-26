@@ -1,0 +1,140 @@
+# Mihomo (Clash Meta) Config for Home Assistant Global VPN
+# Path: /config/mihomo/config.yaml
+
+# General Settings
+mixed-port: 7893
+port: 7890
+socks-port: 7891
+redir-port: 7892
+tproxy-port: 7895
+allow-lan: true
+log-level: info
+ipv6: true
+mode: rule
+bind-address: "*"
+secret: ssyQ6Xl7
+
+# Dashboard Settings (Integrated with the HA Add-on)
+external-controller: 0.0.0.0:9090
+external-ui: "/ui"
+external-ui-name: metacubexd
+
+# TUN Mode - CRITICAL for Global VPN & Network Gateway
+tun:
+  enable: true
+  stack: system # 'system' is recommended for Home Assistant OS
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - 'any:53'
+    - 'tcp://any:53'
+
+# DNS Configuration
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.0/16
+  respect-rules: true
+  default-nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+  proxy-server-nameserver:
+    - 1.1.1.1
+    - 8.8.8.8
+  fake-ip-filter:
+    - "*.lan"
+    - "*.linksys.com"
+    - "*.linksyssmartwifi.com"
+    - swscan.apple.com
+    - mesu.apple.com
+    - "*.msftconnecttest.com"
+    - "*.msftncsi.com"
+    - "time.*.com"
+    - "ntp.*.org"
+    - "+.pool.ntp.org"
+    - localhost.ptlogin2.qq.com
+
+# Sniffer for better domain identification
+sniffer:
+  enable: true
+  override-destination: true
+  sniff:
+    TLS:
+      ports: [443, 8443]
+    HTTP:
+      ports: [80, 8080-8880]
+      override-destination: true
+
+# Proxies
+proxies:
+  - name: "Hy2-Global"
+    type: hysteria2
+    server: 107.182.23.115
+    port: 8443
+    tls: true
+    password: cf0kAadaDIcSXavo
+    sni: bing.com
+    alpn:
+      - h3
+    skip-cert-verify: true
+
+  - name: "Disneyplus-VLESS"
+    type: vless
+    server: 77.37.96.111
+    port: 443
+    uuid: 41dea138-6ce1-4f83-b678-6a276894f968
+    network: tcp
+    servername: www.bing.com
+    tls: true
+    reality-opts:
+      public-key: fK0moREddIXdinjZLwYDfaB0W5TAFk-v-pWWkqZ-8jQ
+      short-id: 0123456789abcdef
+    client-fingerprint: chrome
+    flow: xtls-rprx-vision
+
+# Proxy Groups
+proxy-groups:
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "♻️ 自动选择"
+      - DIRECT
+      - "Hy2-Global"
+
+  - name: "♻️ 自动选择"
+    type: url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 300
+    proxies:
+      - "Hy2-Global"
+
+  - name: "🌍 国外媒体"
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - "Hy2-Global"
+
+  - name: "Disney+"
+    type: select
+    proxies:
+      - "Disneyplus-VLESS"
+      - "🚀 节点选择"
+
+  - name: "🐟 漏网之鱼"
+    type: select
+    proxies:
+      - "🚀 节点选择"
+      - DIRECT
+
+# Rules
+rules:
+  - DOMAIN-SUFFIX,disneyplus.com,Disney+
+  - DOMAIN-SUFFIX,netflix.com,🌍 国外媒体
+  - DOMAIN-KEYWORD,google,🚀 节点选择
+  - GEOIP,CN,DIRECT
+  - MATCH,🐟 漏网之鱼

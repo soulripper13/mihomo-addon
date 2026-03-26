@@ -1,0 +1,21 @@
+name: "Mihomo Global VPN"
+description: "Mihomo (Clash Meta) with TUN mode for host and network-wide VPN."
+version: "1.0.0"
+slug: "mihomo_vpn"
+arch:
+  - aarch64
+  - amd64
+init: false
+host_network: true
+map:
+  - config:rw
+privileged:
+  - NET_ADMIN
+  - NET_RAW
+  - SYS_ADMIN
+  - SYS_MODULE
+full_access: true
+options:
+  config_path: "/config/mihomo/config.yaml"
+schema:
+  config_path: str
