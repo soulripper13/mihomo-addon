@@ -32,10 +32,15 @@ if [ ! -d "${CONFIG_DIR}" ]; then
     mkdir -p "${CONFIG_DIR}"
 fi
 
-# Check if config file exists; if not, create it from the default template
-if [ ! -f "${CONFIG_PATH}" ]; then
+# If the user pasted config content in the add-on UI, write it to the file
+CONFIG_CONTENT=$(bashio::config 'config_content')
+if [ -n "${CONFIG_CONTENT}" ]; then
+    bashio::log.info "Writing config from add-on configuration tab..."
+    printf '%s' "${CONFIG_CONTENT}" > "${CONFIG_PATH}"
+# Otherwise fall back to auto-creating from the default template
+elif [ ! -f "${CONFIG_PATH}" ]; then
     bashio::log.warning "No config found at ${CONFIG_PATH}. Creating a default config."
-    bashio::log.warning "Edit /config/mihomo/config.yaml and restart the add-on to apply your settings."
+    bashio::log.warning "Paste your config in the Configuration tab or edit ${CONFIG_PATH} directly, then restart."
     cp /defaults/config.yaml "${CONFIG_PATH}"
 fi
 
