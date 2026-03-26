@@ -49,6 +49,9 @@ dns:
   fake-ip-filter:
     - "*.lan"
     - "*.local"
+    - "*.hass.io"
+    - "*.local.hass.io"
+    - "ccab4aaf-*"
     - "*.msftconnecttest.com"
     - "*.msftncsi.com"
     - "time.*.com"

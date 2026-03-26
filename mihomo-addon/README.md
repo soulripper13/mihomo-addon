@@ -64,5 +64,21 @@ For a reliable always-on setup:
 2. **Assign a static IP** — set a static IP in HA under **Settings → System → Network**, or assign a static DHCP lease by MAC address on your router. Never use a dynamic IP for a device acting as your network gateway.
 3. **Set up auto-restart** — create a Home Assistant automation to restart the Mihomo addon automatically if it goes down.
 
-## Security Warning
+## Known Issues
+
+### Other HA add-ons failing to connect (Frigate, Mosquitto, etc.)
+
+Mihomo's `fake-ip` DNS mode intercepts hostname resolution for bare hostnames (e.g. `ccab4aaf-frigate-fa`) and assigns them fake IPs, breaking internal HA add-on communication.
+
+**Fix:** Use the add-on's direct Docker IP instead of its hostname. To find it, run this in the HA terminal:
+
+```bash
+docker inspect addon_ccab4aaf_frigate-fa | grep IPAddress
+```
+
+Then configure the integration to use `http://<IP>:5000` instead of the hostname.
+
+> Note: This IP can change if the add-on is reinstalled. Re-run the command above if it breaks again.
+
+
 This add-on runs with **Privileged** access and **Host Network** mode. It has full control over your machine's network stack. Use only with a configuration you trust.
