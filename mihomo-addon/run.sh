@@ -2,6 +2,9 @@
 
 bashio::log.info "Starting Mihomo VPN Add-on..."
 
+# Wait for network to be ready
+bashio::net.wait_for_interface || sleep 5
+
 # Enable IP Forwarding
 bashio::log.info "Enabling IP Forwarding..."
 if [ "$(cat /proc/sys/net/ipv4/ip_forward)" = "1" ]; then
@@ -33,10 +36,10 @@ if [ ! -d "${CONFIG_DIR}" ]; then
 fi
 
 # If the user pasted config content in the add-on UI, write it to the file
-CONFIG_CONTENT=$(bashio::config 'config_content')
+CONFIG_CONTENT=$(jq -r '.config_content // empty' /data/options.json)
 if [ -n "${CONFIG_CONTENT}" ]; then
     bashio::log.info "Writing config from add-on configuration tab..."
-    printf '%s' "${CONFIG_CONTENT}" > "${CONFIG_PATH}"
+    printf '%s\n' "${CONFIG_CONTENT}" > "${CONFIG_PATH}"
 # Otherwise fall back to auto-creating from the default template
 elif [ ! -f "${CONFIG_PATH}" ]; then
     bashio::log.warning "No config found at ${CONFIG_PATH}. Creating a default config."
