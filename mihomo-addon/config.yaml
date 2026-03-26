@@ -1,6 +1,6 @@
 name: "Mihomo Global VPN"
 description: "Mihomo (Clash Meta) with TUN mode for host and network-wide VPN."
-version: "1.0.3"
+version: "1.0.4"
 slug: "mihomo-addon"
 startup: services
 arch:

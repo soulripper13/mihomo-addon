@@ -13,9 +13,11 @@ else
     sysctl -w net.ipv4.ip_forward=1 || echo 1 > /proc/sys/net/ipv4/ip_forward || bashio::log.warning "Failed to set net.ipv4.ip_forward=1. Whole network gateway might not work."
 fi
 
-# Set up MASQUERADE
+# Set up MASQUERADE — scoped to WAN only, exclude internal Docker/HA bridges
 bashio::log.info "Setting up IPTables Masquerade..."
-iptables -t nat -A POSTROUTING -j MASQUERADE || bashio::log.warning "Failed to set iptables MASQUERADE"
+WAN_IF=$(ip route | awk '/^default/{print $5; exit}')
+bashio::log.info "WAN interface: ${WAN_IF}"
+iptables -t nat -A POSTROUTING -o "${WAN_IF}" -j MASQUERADE || bashio::log.warning "Failed to set iptables MASQUERADE"
 
 # Get Config path from options
 CONFIG_PATH=$(bashio::config 'config_path')
