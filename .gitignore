@@ -1,0 +1,7 @@
+# macOS
+.DS_Store
+
+# Mihomo runtime files
+mihomo-addon/mihomo/*.db
+mihomo-addon/mihomo/*.mmdb
+mihomo-addon/mihomo/cache.db
