@@ -1,0 +1,74 @@
+name: Build and Push to GHCR
+
+on:
+  release:
+    types: [published]
+  push:
+    branches:
+      - main
+    paths:
+      - "mihomo-addon/**"
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    strategy:
+      matrix:
+        arch:
+          - aarch64
+          - amd64
+          - armhf
+          - armv7
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set platform and base image
+        id: vars
+        run: |
+          case "${{ matrix.arch }}" in
+            aarch64) PLATFORM="linux/arm64";  BASE="ghcr.io/home-assistant/aarch64-base:latest" ;;
+            amd64)   PLATFORM="linux/amd64";  BASE="ghcr.io/home-assistant/amd64-base:latest" ;;
+            armhf)   PLATFORM="linux/arm/v6"; BASE="ghcr.io/home-assistant/armhf-base:latest" ;;
+            armv7)   PLATFORM="linux/arm/v7"; BASE="ghcr.io/home-assistant/armv7-base:latest" ;;
+          esac
+          echo "platform=${PLATFORM}" >> $GITHUB_OUTPUT
+          echo "base=${BASE}" >> $GITHUB_OUTPUT
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' mihomo-addon/config.yaml | awk '{print $2}' | tr -d '"')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: ./mihomo-addon
+          platforms: ${{ steps.vars.outputs.platform }}
+          push: true
+          build-args: |
+            BUILD_FROM=${{ steps.vars.outputs.base }}
+            BUILD_ARCH=${{ matrix.arch }}
+          tags: |
+            ghcr.io/soulripper13/mihomo-addon/${{ matrix.arch }}:${{ steps.version.outputs.version }}
+            ghcr.io/soulripper13/mihomo-addon/${{ matrix.arch }}:latest
