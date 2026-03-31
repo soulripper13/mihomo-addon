@@ -49,14 +49,17 @@ dns:
   fake-ip-filter:
     - "*.lan"
     - "*.local"
-    - "*.hass.io"
     - "*.local.hass.io"
+    - "*.hass.io"
     - "ccab4aaf-*"
     - "*.msftconnecttest.com"
     - "*.msftncsi.com"
     - "time.*.com"
     - "ntp.*.org"
     - "+.pool.ntp.org"
+    - "*-homekit.*"
+    - "*.apple.*"
+    - "homeassistant.*"
 
 # Sniffer for better domain identification
 sniffer:
